@@ -1,0 +1,206 @@
+{% extends "network/layout.html" %}
+{% load static  %}
+{% load custom_tags%}
+
+{% block body %}
+<div class="page-inner no-page-title" id="index_page">
+    <!-- start page main wrapper -->
+    <div id="main-wrapper">
+        <div class="row">
+            <!-- Start of left content -->
+            <div class="col-lg-5 col-xl-3">
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <ul class="nav-main" id="navbar">    
+
+                            <li class="nav-main-item">
+                                <a class="nav-main-link" href="{% url 'index' %}">
+                                    <i class="nav-main-link-icon fa fa-home"></i>
+                                    <span class="nav-main-link-name">All Posts</span>
+                                </a>
+                            </li>
+                            <li class="nav-main-item">
+                                <a class="nav-main-link" href="{% url 'following' %}">
+                                    <i class="nav-main-link-icon fa fa-users"></i>
+                                    <span class="nav-main-link-name">Followers</span>
+                                </a>
+                            </li>
+                            <li class="nav-main-item">
+                                <a class="nav-main-link" href="{% url 'profile' user%}">
+                                    <i class="nav-main-link-icon fa fa-user"></i>
+                                    <span class="nav-main-link-name">Profile</span>
+                                </a>
+                            </li>
+                            <li class="nav-main-item">
+                                <a class="nav-main-link" href="">
+                                    <i class="nav-main-link-icon fa fa-commenting"></i>
+                                    <span class="nav-main-link-name">Messages</span>
+                                </a>
+                            </li>
+                            <li class="nav-main-item">
+                                <a class="nav-main-link" href="#">
+                                    <i class="nav-main-link-icon fa fa-ellipsis-h"></i>
+                                    <span class="nav-main-link-name">More</span>
+                                </a> 
+                            </li>
+                            
+                             <li class="nav-main-item" type="button" id="dropdownMenu2" data-bs-toggle="dropdown" aria-expanded="false">
+                                <a class="nav-main-link" href="#">
+                                    <i class="nav-main-link-icon fa fa-cog"></i>
+                                    <span class="nav-main-link-name">{{ user.username }}</span>
+                                </a>
+                            </li>
+                            <ul class="dropdown-menu" aria-labelledby="dropdownMenu2">
+                                <li class="nav-main-item">
+                                <a class="nav-main-link" href="{% url 'logout' %}">
+                                    <i class="nav-main-link-icon fa fa-sign-out"></i>
+                                    <span class="nav-main-link-name">Log out</span>
+                                </a> 
+                            </li>
+                            </ul>
+                        </ul>
+                    </div>
+                </div>
+            </div>  <!-- End of left content -->
+
+            <!-- Start of center content -->
+            <div class="col-lg-7 col-xl-6">
+
+                <div class="card card-white grid-margin">  
+                    <div class="card-body">
+                        <h4>Activity Feed</h4>
+                        <hr>
+                        <form data-id="{{user.id}}" data-user="{{user.username}}" method="post" class="panel-activity__status">
+                            {% csrf_token %}
+                            <textarea name="content" id="content" placeholder="Share what you've been up to..." class="form-control"></textarea>
+                            <div class="actions">
+                                <div class="btn-group">
+                                    <button type="button" class="btn-link" title="" data-toggle="tooltip" data-original-title="Post an Image">
+                                        <i class="fa fa-image"></i>
+                                    </button>
+                                    <button type="button" class="btn-link" title="" data-toggle="tooltip" data-original-title="Post an Video">
+                                        <i class="fa fa-video-camera"></i>
+                                    </button>
+                                    <button type="button" class="btn-link" title="" data-toggle="tooltip" data-original-title="Post an Idea">
+                                        <i class="fa fa-lightbulb-o"></i>
+                                    </button>
+                                    <button type="button" class="btn-link" title="" data-toggle="tooltip" data-original-title="Post an Question">
+                                        <i class="fa fa-question-circle-o"></i>
+                                    </button>
+                                </div>
+                                <button type="submit" data-id="{{user.id}}" id="btn_submit" class="btn btn-blue">
+                                    Post
+                                </button>
+                            </div>
+                        </form>
+                        
+                        <div class="profile-timeline">
+                            <ul class="list-unstyled">
+                                <hr style="margin-bottom: 0px;">
+                                <!-- Posts-->
+                                {% for post in posts_pages %}
+                                <li class="timeline-item" id="post_{{post.id}}">
+                                    <div class="card card-white card-no-padding">
+                                        <div class="card-body">
+                                            <div class="timeline-item-header">
+                                                <img src="{% static 'network/img/user-'%}{{ post.user }}.png">
+                                                <p><a class="a_user" href="{% url 'profile' post.user %}">{{post.user}} </a><span>posted on</span></p>
+                                                <small>{{post.timestamp}}</small>
+                                            </div>
+                                            <div class="timeline-item-post">
+                                                <p>{{post.content}}</p>
+                                                <div class="timeline-options">
+
+                                                    {% if post.id in user_liked_posts%}
+                                                        <a class="like_btn active" id="{{post.id}}"><i class="fa fa-thumbs-up"></i> Like <span id="likes_{{post.id}}">({{post_num_likes|lookup:post.id}})</span></a>
+                                                    {% else %}
+                                                        <a class="like_btn" id="{{post.id}}"><i class="fa fa-thumbs-up"></i> Like <span id="likes_{{post.id}}">({{post_num_likes|lookup:post.id}})</span></a>
+                                                    {% endif %}
+                                                    
+                                                    <a><i class="fa fa-comment"></i> Comment</a>
+                                                    <a><i class="fa fa-share"></i> Share</a>
+                                                    {% if post.user.id == user.id%}
+                                                    <a class="edit_btn" data-id="{{post.id}}"><i class="fa fa-pencil"></i> Edit</a>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </li>
+                                <hr style="margin-bottom: 0px;margin-top: 0px;">
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        {% if posts_pages.has_other_pages %}
+                            <ul class="pagination justify-content-center">
+                        {% if posts_pages.has_previous %}
+                            <li class="page-item"><a class="page-link" href="?page={{ posts_pages.previous_page_number }}">«</a></li>
+                        {% else %}
+                            <li class="page-item disabled"><a class="page-link"><span>«</span></a></li>
+                        {% endif %}
+                        {% for i in posts_pages.paginator.page_range %}
+                            {% if posts_pages.number == i %}
+                            <li class="page-item active"><a class="page-link">{{ i }} <span class="page-link sr-only">(current)</span></a></li>
+                            {% else %}
+                            <li class="page-item"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
+                            {% endif %}
+                        {% endfor %}
+                        {% if posts_pages.has_next %}
+                            <li class="page-item"><a class="page-link" href="?page={{ posts_pages.next_page_number }}">»</a></li>
+                        {% else %}
+                            <li class="page-item disabled"><a class="page-link"><span>»</span></a></li>
+                        {% endif %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                </div>        
+            </div>
+            <!-- End of center content -->
+
+             <!-- Start of right side bar -->
+            <div class="col-lg-12 col-xl-3">
+                <div class="card card-white grid-margin">
+                    <div class="card-heading clearfix">
+                        <h4 class="card-title">Connect with</h4>
+                    </div>
+                    <div class="card-body">
+                         <div class="team">
+                            <div class="team-member">
+                                <div class="online on"></div>
+                                <img src="{% static 'network/img/'%}avatar7.png" alt="" />
+                            </div>
+                            <div class="team-member">
+                                <div class="online on"></div>
+                                <img src="{% static 'network/img/'%}avatar7.png" alt="" />
+                            </div>
+                            <div class="team-member">
+                                <div class="online off"></div>
+                                <img src="{% static 'network/img/'%}avatar7.png" alt="" />
+                            </div>
+                            <div class="team-member">
+                                <div class="online off"></div>
+                                <img src="{% static 'network/img/'%}avatar7.png" alt="" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                    <div class="card card-white">
+                        <div class="card-heading clearfix">
+                            <h4 class="card-title">Trends</h4>
+                        </div>
+                        <div class="card-body">
+                            <p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis architecto.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- End of right side bar -->
+        </div>
+    </div>
+</div>
+
+
+
+
+
+{% endblock %}
